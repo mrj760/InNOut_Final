@@ -1,10 +1,13 @@
 package mjohnson.cs134.miracosta.edu.Order;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Order {
+public class Order implements Parcelable {
 
     private static final double CA_SALES_TAX = 0.08;
 
@@ -43,6 +46,8 @@ public class Order {
     private int cheeseburgerQuant;
     private int fryQuant;
     private int shakeQuant;
+    private int totalItems;
+
 
 
 
@@ -66,6 +71,7 @@ public class Order {
         cheeseburgerQuant=0;
         fryQuant=0;
         shakeQuant=0;
+        totalItems=0;
     }
 
 
@@ -136,6 +142,35 @@ public class Order {
         return largeDrinks;
     }
 
+    public String drinksToString() {
+
+        String s = "";
+
+        if (getSmallDrinks()>0)
+        {
+            s+= getSmallDrinks() + " Sm Ftn Drink" +
+                "\n\t\t\t\t\t\t$" + df.format(getSmallDrinks()*smallDrinkPrice);
+        }
+        if (getSmallDrinks()>0 && getMediumDrinks()>0)
+            s+="\n";
+        if (getMediumDrinks()>0)
+        {
+            s+= getMediumDrinks() + " Med Ftn Drink" +
+                    "\n\t\t\t\t\t\t$" + df.format(getMediumDrinks()*mediumDrinkPrice);
+        }
+        if (getMediumDrinks()>0 && getLargeDrinks()>0)
+            s+="\n";
+        if (getSmallDrinks()>0 && getLargeDrinks()>0)
+            s+="\n";
+        if (getLargeDrinks()>0)
+        {
+            s+= getLargeDrinks() + " Lg Ftn Drink" +
+                    "\n\t\t\t\t\t\t$" + df.format(getLargeDrinks()*largeDrinkPrice);
+        }
+
+        return s;
+    }
+
     public DoubleDouble getDoubleDouble(int i) {return doubleDouble.get(i);}
 
     public CheeseBurger getCheeseburger(int i) { return cheeseBurger.get(i); }
@@ -168,36 +203,53 @@ public class Order {
         return total;
     }
 
+    public int getTotalItems() {
+        return totalItems;
+    }
 
+    /** adds to the respective array lists */
+    public void addDoubleDouble() {doubleDouble.add(new DoubleDouble()); doubleDoubleQuant++; totalItems++;}
+    public void addCheeseburger() {cheeseBurger.add(new CheeseBurger()); cheeseburgerQuant++; totalItems++;}
+    public void addFrenchFries() {frenchFries.add( new FrenchFries()); fryQuant++; totalItems++;}
+    public void addShake() {
+        shake.add(new Shake());
+        shakeQuant++;
+        totalItems++;
+    }
+    public void addShake(int f) {
+        shake.add(new Shake(f));
+        shakeQuant++;
+        totalItems++;
+    }
 
-        /** adds to the respective array lists */
-    public void addDoubleDouble() {doubleDouble.add(new DoubleDouble()); doubleDoubleQuant++;}
-    public void addCheeseburger() {cheeseBurger.add(new CheeseBurger()); cheeseburgerQuant++;}
-    public void addFrenchFries() {frenchFries.add( new FrenchFries()); fryQuant++;}
-    public void addShake() {shake.add(new Shake()); shakeQuant++;}
-
-        /** removes from the respoective array lists */
+        /** removes from the respective array lists */
     public void removeDoubleDouble(int i) {
-        if (!doubleDouble.isEmpty())
+        if (!doubleDouble.isEmpty()) {
             doubleDouble.remove(i);
-        if (doubleDoubleQuant>0)
-            doubleDoubleQuant--;}
+            doubleDoubleQuant--;
+            totalItems--;
+        }
+    }
     public void removeCheeseburger(int i) {
-        if (!cheeseBurger.isEmpty())
+        if (!cheeseBurger.isEmpty()) {
             cheeseBurger.remove(i);
-        if (cheeseburgerQuant>0)
-            cheeseburgerQuant--;}
+            cheeseburgerQuant--;
+            totalItems--;
+        }
+    }
     public void removeFrenchFries(int i) {
-        if (!frenchFries.isEmpty())
+        if (!frenchFries.isEmpty()) {
             frenchFries.remove(i);
-        if (fryQuant>0)
             fryQuant--;
+            totalItems--;
+        }
     }
     public void removeShake(int i) {
-        if (!shake.isEmpty())
+        if (!shake.isEmpty()) {
             shake.remove(i);
-        if (shakeQuant>0)
             shakeQuant--;
+            totalItems--;
+        }
     }
 
     // pass this the shake position and the flavor (1: vanilla, 2: chocolate, 3: strawberry)
@@ -230,7 +282,13 @@ public class Order {
     @Override
     public String toString() {
 
-        String s = "OrderActivity: ";
+        /** Have to make these 0 at the beginning here because otherwise as the object gets passed back and forth the total prices
+         * basically double every time since we're just adding themselves ,+/- whatever extra costs, to their previous values */
+        subTotal =0;
+        tax = 0;
+        total = 0;
+
+        String s = "Your Order: \n";
 
         // add double doubles to order print
         for (int i=0; i < doubleDouble.size(); i++) {
@@ -317,13 +375,13 @@ public class Order {
 
         /** add total numbers and tax to print */
 
-        s+="\n\n\t\t\tSubtotal:\t\t$" + df.format(subTotal);
+        s+="\n\n\n\t\t\tSubtotal:\t\t\t\t$" + df.format(subTotal);
 
         tax = subTotal*CA_SALES_TAX;
         s+="\n\n\t\t\tSales Tax (8%):\t$" + df.format(tax);
 
         total = tax + subTotal;
-        s+="\n\n\t\t\tTotal:\t\t$" + df.format((total));
+        s+="\n\n\t\t\tTotal:\t\t\t\t\t$" + df.format((total));
 
 
 
@@ -352,7 +410,7 @@ public class Order {
 
 
     /** These all can be animalStyled */
-    public static class DoubleDouble {
+    public static class DoubleDouble implements Parcelable {
         private boolean AnimalStyle;
 
         public DoubleDouble() {
@@ -367,47 +425,178 @@ public class Order {
 
         @Override
         public String toString() {
+            double price = getDoubleDoublePrice();
             String s = "Double Double";
-            if (AnimalStyle)
-                s+="\n\tAnimalStyle";
+            if (AnimalStyle) {
+                s += "\n\tAnimal Style";
+                price = getDoubleDoublePrice()+animalStyleBurgerPrice;
+            }
+            s+="\n\t\t\t\t\t\t$" + df.format(price);
             return s;
         }
 
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeByte(this.AnimalStyle ? (byte) 1 : (byte) 0);
+        }
+
+        protected DoubleDouble(Parcel in) {
+            this.AnimalStyle = in.readByte() != 0;
+        }
+
+        public static final Parcelable.Creator<DoubleDouble> CREATOR = new Parcelable.Creator<DoubleDouble>() {
+            @Override
+            public DoubleDouble createFromParcel(Parcel source) {
+                return new DoubleDouble(source);
+            }
+
+            @Override
+            public DoubleDouble[] newArray(int size) {
+                return new DoubleDouble[size];
+            }
+        };
     }
-    private class CheeseBurger {
+    public static class CheeseBurger implements Parcelable {
+
+
         boolean isAnimalStyle = false;
+
+        public boolean getAnimalStyle() {
+            return isAnimalStyle;
+        }
 
         public void setAnimalStyle() { isAnimalStyle = !isAnimalStyle; }
 
         @Override
         public String toString() {
             String s = "Cheeseburger";
-            if (isAnimalStyle)
-                s+="\n\tAnimalStyle";
+            double price = getCheeseBurgerPrice();
+            if (isAnimalStyle) {
+                s += "\n\tAnimal Style";
+                price = getCheeseBurgerPrice()+animalStyleBurgerPrice;
+            }
+
+            s+="\n\t\t\t\t\t\t$" + df.format(price);
             return s;
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeByte(this.isAnimalStyle ? (byte) 1 : (byte) 0);
+        }
+
+        public CheeseBurger() {
+        }
+
+        protected CheeseBurger(Parcel in) {
+            this.isAnimalStyle = in.readByte() != 0;
+        }
+
+        public static final Parcelable.Creator<CheeseBurger> CREATOR = new Parcelable.Creator<CheeseBurger>() {
+            @Override
+            public CheeseBurger createFromParcel(Parcel source) {
+                return new CheeseBurger(source);
+            }
+
+            @Override
+            public CheeseBurger[] newArray(int size) {
+                return new CheeseBurger[size];
+            }
+        };
     }
-    private class FrenchFries {
+    public static class FrenchFries implements Parcelable {
+
+
         boolean isAnimalStyle = false;
+
+        public boolean getAnimalStyle() {
+            return isAnimalStyle;
+        }
 
         public void setAnimalStyle() { isAnimalStyle = !isAnimalStyle; }
 
         @Override
         public String toString() {
+            double price = getFrenchFriesPrice();
             String s = "FF";
-            if (isAnimalStyle)
-                s+="\n\tAnimalStyle";
+            if (isAnimalStyle) {
+                s += "\n\tAnimal Style";
+                price = getFrenchFriesPrice()+animalStyleFriesPrice;
+            }
+
+            s+="\n\t\t\t\t\t\t$" + df.format(price);
             return s;
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeByte(this.isAnimalStyle ? (byte) 1 : (byte) 0);
+        }
+
+        public FrenchFries() {
+        }
+
+        protected FrenchFries(Parcel in) {
+            this.isAnimalStyle = in.readByte() != 0;
+        }
+
+        public static final Parcelable.Creator<FrenchFries> CREATOR = new Parcelable.Creator<FrenchFries>() {
+            @Override
+            public FrenchFries createFromParcel(Parcel source) {
+                return new FrenchFries(source);
+            }
+
+            @Override
+            public FrenchFries[] newArray(int size) {
+                return new FrenchFries[size];
+            }
+        };
     }
 
     /** Basically if ordering off the normal menu, you'll get to choose one flavor.
      * If you order off the secret menu, you'll get to mix */
-    private class Shake {
+    public static class Shake implements Parcelable {
 
         // vanilla by default
         boolean [] flavor = {/*vanilla */true, /*chocolate*/false, /*strawberry*/false};
         boolean isLarge = false;
+
+        /** make a shake of a certain flavor with this constructor*/
+        public Shake(int i) {
+            switch (i) {
+                    //vanilla
+                case(1):
+                    break;
+                    // chocolate
+                case (2):
+                    flavor[0] = false;
+                    flavor[1] = true;
+                    break;
+                    // strawberry
+                case (3):
+                    flavor[0] = false;
+                    flavor[2] = true;
+                    break;
+                    //vanilla
+                default:
+                    break;
+            }
+        }
 
         // basic menu function
         public void setFlavor(int f) {
@@ -433,15 +622,49 @@ public class Order {
                     break;
             }
         }
+        public int getFlavor() {
+            if (flavor[0])
+                return 1;
+            else if(flavor[1])
+                return 2;
+            else if(flavor[2])
+                return 3;
+            else
+                return -1;
+        }
+        public boolean[] getFlavors() {
+            boolean[] flavors = new boolean[3];
+            if (flavor[0])
+                flavors[0]= true;
+            else
+                flavors[0]=false;
+
+            if (flavor[1])
+                flavors[1] = true;
+            else
+                flavors[1] = false;
+
+            if (flavor[2])
+                flavors[2] = true;
+            else
+                flavors[2] = false;
+
+            return flavors;
+
+
+        }
 
         // secret menu functions
         public void addFlavor(int f) {
             if (f < 1 || f > 3) { System.out.println("Called with invalid argument. Should be between 1-3"); return; }
-            flavor[f] = true;
+            flavor[f-1] = true;
         }
         public void removeFlavor(int f) {
             if (f < 1 || f > 3) { System.out.println("Called with invalid argument. Should be between 1-3"); return; }
-            flavor[f] = false;
+            flavor[f-1] = false;
+            /** we can't have a flavorless shake, so if they're all false set it to vanilla by default */
+            if (!flavor[0] && !flavor[1] && !flavor[2])
+                flavor[0] = true;
         }
         public void changeSize()  { isLarge = !isLarge; }
 
@@ -457,11 +680,96 @@ public class Order {
             if (flavor[2])
                 s+="\n\tStrawberry";
 
+            s+="\n\t\t\t\t\t\t$" + df.format(getShakePrice());
+
 
             return s;
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeBooleanArray(this.flavor);
+            dest.writeByte(this.isLarge ? (byte) 1 : (byte) 0);
+        }
+
+        public Shake() {
+        }
+
+        protected Shake(Parcel in) {
+            this.flavor = in.createBooleanArray();
+            this.isLarge = in.readByte() != 0;
+        }
+
+        public static final Creator<Shake> CREATOR = new Creator<Shake>() {
+            @Override
+            public Shake createFromParcel(Parcel source) {
+                return new Shake(source);
+            }
+
+            @Override
+            public Shake[] newArray(int size) {
+                return new Shake[size];
+            }
+        };
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(this.doubleDouble);
+        dest.writeTypedList(this.cheeseBurger);
+        dest.writeTypedList(this.frenchFries);
+        dest.writeTypedList(this.shake);
+        dest.writeInt(this.smallDrinks);
+        dest.writeInt(this.mediumDrinks);
+        dest.writeInt(this.largeDrinks);
+        dest.writeDouble(this.subTotal);
+        dest.writeDouble(this.tax);
+        dest.writeDouble(this.total);
+        dest.writeInt(this.doubleDoubleQuant);
+        dest.writeInt(this.cheeseburgerQuant);
+        dest.writeInt(this.fryQuant);
+        dest.writeInt(this.shakeQuant);
+        dest.writeInt(this.totalItems);
+    }
+
+    protected Order(Parcel in) {
+        this.doubleDouble = in.createTypedArrayList(DoubleDouble.CREATOR);
+        this.cheeseBurger = in.createTypedArrayList(CheeseBurger.CREATOR);
+        this.frenchFries = in.createTypedArrayList(FrenchFries.CREATOR);
+        this.shake = in.createTypedArrayList(Shake.CREATOR);
+        this.smallDrinks = in.readInt();
+        this.mediumDrinks = in.readInt();
+        this.largeDrinks = in.readInt();
+        this.subTotal = in.readDouble();
+        this.tax = in.readDouble();
+        this.total = in.readDouble();
+        this.doubleDoubleQuant = in.readInt();
+        this.cheeseburgerQuant = in.readInt();
+        this.fryQuant = in.readInt();
+        this.shakeQuant = in.readInt();
+        this.totalItems = in.readInt();
+    }
+
+    public static final Creator<Order> CREATOR = new Creator<Order>() {
+        @Override
+        public Order createFromParcel(Parcel source) {
+            return new Order(source);
+        }
+
+        @Override
+        public Order[] newArray(int size) {
+            return new Order[size];
+        }
+    };
 }

@@ -6,7 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.QuickContactBadge;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DecimalFormat;
 
@@ -46,6 +49,8 @@ public class OrderActivity extends AppCompatActivity {
     private Button addLargeDrink;
     private Button removeLargeDrink;
     private Button confirmOrder;
+
+    private RadioGroup flavor;
 
 
     Order o = new Order();
@@ -94,6 +99,7 @@ public class OrderActivity extends AppCompatActivity {
         addLargeDrink=findViewById(R.id.addLargeDrinkBtn);
         removeLargeDrink=findViewById(R.id.removeLargeDrinkBtn);
         confirmOrder=findViewById(R.id.confirmOrderBtn);
+        flavor = findViewById(R.id.flavor);
 
 
 
@@ -121,7 +127,33 @@ public class OrderActivity extends AppCompatActivity {
     public void addDoubleDouble(View v) {o.addDoubleDouble(); doubleDoubleQuantTV.setText(o.getDoubleDoubleQuant() + "");}
     public void addCheeseburger(View v) {o.addCheeseburger(); cheeseBurgerQuantTV.setText(o.getCheeseburgerQuant() +"");}
     public void addFry(View v) {o.addFrenchFries(); frenchFriesQuantTV.setText(o.getFryQuant() +"");}
-    public void addShake(View v) {o.addShake(); shakeQuantTV.setText(o.getShakeQuant() +"");}
+    public void addShake(View v) {
+
+        switch (flavor.getCheckedRadioButtonId())
+        {
+
+            case(R.id.vanilla) :
+                Toast.makeText(this, R.string.vanilla_added,
+                        Toast.LENGTH_SHORT).show();
+                o.addShake(1);
+                break;
+            case(R.id.chocolate) :
+                Toast.makeText(this, R.string.chocolate_added,
+                        Toast.LENGTH_SHORT).show();
+                o.addShake(2);
+                break;
+            case(R.id.strawberry) :
+                Toast.makeText(this, R.string.strawberry_added,
+                        Toast.LENGTH_SHORT).show();
+                o.addShake(3);
+                break;
+            default:
+                break;
+        }
+
+        shakeQuantTV.setText(o.getShakeQuant() +"");
+
+    }
     public void addSmallDrink (View v) {o.addSmallDrink(); smallDrinkQuantTV.setText(o.getSmallDrinks() +"");}
     public void addMediumDrink (View v) {o.addMediumDrink(); mediumDrinkQuantTV.setText(o.getMediumDrinks() + "");}
     public void addLargeDrink (View v) {o.addLargeDrink(); largeDrinkQuantTV.setText(o.getLargeDrinks() + "");}
@@ -145,8 +177,41 @@ public class OrderActivity extends AppCompatActivity {
     }
 
     public void removeShake (View v) {
-            o.removeShake(o.getShakeQuant()-1);
-            shakeQuantTV.setText(o.getShakeQuant() + "");
+
+            // if there are shakes in the order
+            if (o.getShakeQuant()>=1) {
+
+                // get the shake flavor of the last element of the arrayList (1: vanilla, 2: choc, 3: strawberry)
+                    // and toast it
+                int f = o.getShake(o.getShakeQuant()-1).getFlavor();
+                // toast to let user know which flavor was removed
+                switch (f) {
+                    case (1):
+                        Toast.makeText(this, R.string.vanilla_removed,
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case (2):
+                        Toast.makeText(this, R.string.chocolate_removed,
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case (3):
+                        Toast.makeText(this, R.string.strawberry_removed,
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        break;
+                }
+
+
+                // remove it
+                o.removeShake(o.getShakeQuant()-1);
+                shakeQuantTV.setText(o.getShakeQuant() + "");
+            }
+
+            // if there are no shakes in the order
+            else
+                shakeQuantTV.setText("0");
+
     }
     public void removeSmallDrink (View v) {o.removeSmallDrink(); smallDrinkQuantTV.setText(o.getSmallDrinks() +"");}
     public void removeMediumDrink (View v) {o.removeMediumDrink(); mediumDrinkQuantTV.setText(o.getMediumDrinks() + "");}
@@ -157,15 +222,16 @@ public class OrderActivity extends AppCompatActivity {
     /** getting ready to confirm the order (and hit the secret menu ) */
 
     public void confirmOrder(View v) {
+        if (o.getTotalItems()<=0)
+        {
+            Toast.makeText(this, R.string.no_food_ordered,
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Intent i = new Intent(this, OrderConfirmScreen.class);
 
-        i.putExtra("doubleDoubleQuant", o.getDoubleDoubleQuant()+"");
-        i.putExtra("cheeseburgerQuant", o.getCheeseburgerQuant()+"");
-        i.putExtra("fryQuant", o.getFryQuant()+"");
-        i.putExtra("shakeQuant", o.getShakeQuant()+"");
-        i.putExtra("smallDrinkQuant", o.getSmallDrinks()+"");
-        i.putExtra("mediumDrinkQuant", o.getMediumDrinks()+"");
-        i.putExtra("largeDrinkQuant", o.getLargeDrinks()+"");
+        i.putExtra("order", o);
 
         startActivity(i);
         this.finish();

@@ -16,4 +16,21 @@
     <string name="sub_total">Sub-Total: </string>
     <string name="tax">Tax: </string>
     <string name="total">Total: </string>
+    <string name="vanilla">Vanilla</string>
+    <string name="chocolate">Chocolate</string>
+    <string name="strawberry">Strawberry</string>
+    <string name="vanilla_added">Vanilla Shake Added!</string>
+    <string name="chocolate_added">Chocolate Shake Added!</string>
+    <string name="strawberry_added">Strawberry Shake Added!</string>
+    <string name="vanilla_removed">Vanilla Shake Removed</string>
+    <string name="chocolate_removed">Chocolate Shake Removed</string>
+    <string name="strawberry_removed">Strawberry Shake Removed</string>
+    <string name="confirm">Confirm</string>
+    <string name="make_animal_style">Make Animal Style</string>
+    <string name="undo_animal_style">Undo Animal Style</string>
+    <string name="place_order_btn">Place Order</string>
+    <string name="place_another_order">Place Another Order</string>
+    <string name="place_new_order">Place New Order</string>
+    <string name="exit">Exit Application</string>
+    <string name="no_food_ordered">You haven\'t ordered any food!</string>
 </resources>
